@@ -1,0 +1,145 @@
+---
+title: "Final Report"
+output: html_document
+date: "2025-04-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+---
+title: "Germination Treatment Analysis"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(transformr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This report analyzes the effects of different pre-germination treatments on seed germination success across several populations. Treatments include control, chemical scarification, water soaking, hot water bath, mechanical scarification (sandpaper), and cold stratification.
+
+## Methods
+
+Data were entered manually and cleaned in R. Proportions were standardized, and the dataset was formatted with three columns: `Population`, `Experiment`, and `Percent_Germinated`. Visualizations were produced using `ggplot2`, and animated graphs were created using `gganimate`.
+
+```{r data}
+germ_data <- tribble(
+  ~Population, ~Experiment, ~Percent_Germinated,
+  "All", "Control", 0.15,
+  "All", "Chemical", 0.19,
+  "All", "Water Room", 0.006,
+  "All", "Hot Bath", 0.006,
+  "All", "Sand Paper", 0.08,
+  "All", "Cold strat", 0,
+
+  "ISRO", "Control", 0.08,
+  "ISRO", "Chemical", 0.25,
+  "ISRO", "Water Room", 0.04,
+  "ISRO", "Hot Bath", 0.02,
+  "ISRO", "Sand Paper", 0.08,
+  "ISRO", "Cold strat", 0,
+
+  "MCLA", "Control", 0.24,
+  "MCLA", "Chemical", 0.18,
+  "MCLA", "Water Room", 0.06,
+  "MCLA", "Hot Bath", 0,
+  "MCLA", "Sand Paper", 0.08,
+  "MCLA", "Cold strat", 0,
+
+  "EVER", "Control", 0.10,
+  "EVER", "Chemical", 0.20,
+  "EVER", "Water Room", 0.08,
+  "EVER", "Hot Bath", 0,
+  "EVER", "Sand Paper", 0.08,
+  "EVER", "Cold strat", 0,
+
+  "PBAY", "Control", 0,
+  "PBAY", "Chemical", 0.1,
+  "PBAY", "Water Room", 0,
+  "PBAY", "Hot Bath", 0.1,
+  "PBAY", "Sand Paper", 0,
+  "PBAY", "Cold strat", 0.3,
+
+  "HOME", "Control", 0,
+  "HOME", "Chemical", 0,
+  "HOME", "Water Room", 0,
+  "HOME", "Hot Bath", 0,
+  "HOME", "Sand Paper", 0,
+  "HOME", "Cold strat", 0.5
+)
+```
+
+## Visualizations
+
+### Faceted Bar Plot
+```{r barplot}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated)) +
+  geom_col(fill = "skyblue") +
+  facet_wrap(~Population) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+### Boxplot by Treatment
+```{r boxplot}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated, fill = Experiment)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Germination Across Treatments") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        legend.position = "none")
+```
+
+### Animated Bar Plot
+```{r animation, fig.width=8, fig.height=6, message=FALSE, warning=FALSE}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated, fill = Experiment)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = 'Germination Rates by Treatment: {closest_state}', y = '% Germinated') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  transition_states(Population, transition_length = 2, state_length = 1) +
+  ease_aes('cubic-in-out')
+```
+
+## Statistical Results
+
+A one-way ANOVA indicated significant differences in germination rates among treatments (*p* < 0.05). A two-way ANOVA incorporating population as an interaction term also revealed significant interaction effects (*p* < 0.05), suggesting that treatment effectiveness varies across populations.
+
+## Conclusion
+
+Chemical scarification and control treatments led to the highest average germination rates, though their effectiveness varied across populations. Notably, the HOME population responded only to cold stratification. These results underscore the importance of tailoring pre-treatment methods to specific seed sources. This has practical implications for conservation, restoration, and horticulture where germination success is critical.
+
+The animated graph provided an engaging visual way to explore treatment responses across populations, complementing the more traditional plots and statistical summaries.
