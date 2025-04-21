@@ -1,0 +1,22 @@
+---
+title: "Grace McFarlane"
+author: "About Me"
+date: "2025-04-20"
+output: html_document
+---
+![GRIT Garden](/Users/gracemcfarlane/Desktop/GraceMcFa.github.io/media/Picture of me.JPG)
+
+What to say about myself??? I am graduating May 1st with a BS in Botany. My life goal is to own my own winery and to travel the world. 
+
+I chose Botany as my Major because I fell in love with it as a kid tagging along with my grandpa who was a Botany professor at UC Irvine. 
+
+I have been working on an independent research project with Dr. Michael Rotter for the last three years, and I am trying to publish a paper right now. 
+
+ I love the outdoors, hiking, camping, rock climbing, snowboarding, wakeboarding, reading, crocheting, spending time with family and friends, and taking naps. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+

@@ -1,0 +1,153 @@
+
+---
+title: "Germination Treatment Analysis"
+author: "Grace McFarlane"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(transformr)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+![Rubus Parviflorus](/Users/gracemcfarlane/Desktop/GraceMcFa.github.io/media/Rubus parviflorus - main image .jpg)
+
+## Methods
+
+To assess germination rates across different seed pre-treatment methods, we compiled data from six populations under six experimental conditions: Control, Chemical (sulfuric acid bath), Room Temp. Water Bath, Hot Water Bath, Sandpaper Scarification, and Cold Stratification. Data were recorded as the proportion of seeds germinated per treatment in each population.
+
+Data entry and cleaning were conducted in RStudio using the tidyverse package. Non-decimal values (e.g., "1/10") were converted into decimal format for consistency. The data were then organized into a tidy data frame containing three columns: Population, Experiment, and Percent_Germinated.
+
+Several visualizations were generated using ggplot2. A bar chart with facets was created to compare germination rates across treatments within each population. Boxplots were used to visualize overall treatment effects, and a heatmap helped identify patterns of germination success across the entire dataset. 
+
+```{r data}
+germ_data <- tribble(
+  ~Population, ~Experiment, ~Percent_Germinated,
+  "All", "Control", 0.15,
+  "All", "Chemical", 0.19,
+  "All", "Water Room", 0.006,
+  "All", "Hot Bath", 0.006,
+  "All", "Sand Paper", 0.08,
+  "All", "Cold strat", 0,
+
+  "ISRO", "Control", 0.08,
+  "ISRO", "Chemical", 0.25,
+  "ISRO", "Water Room", 0.04,
+  "ISRO", "Hot Bath", 0.02,
+  "ISRO", "Sand Paper", 0.08,
+  "ISRO", "Cold strat", 0,
+
+  "MCLA", "Control", 0.24,
+  "MCLA", "Chemical", 0.18,
+  "MCLA", "Water Room", 0.06,
+  "MCLA", "Hot Bath", 0,
+  "MCLA", "Sand Paper", 0.08,
+  "MCLA", "Cold strat", 0,
+
+  "EVER", "Control", 0.10,
+  "EVER", "Chemical", 0.20,
+  "EVER", "Water Room", 0.08,
+  "EVER", "Hot Bath", 0,
+  "EVER", "Sand Paper", 0.08,
+  "EVER", "Cold strat", 0,
+
+  "PBAY", "Control", 0,
+  "PBAY", "Chemical", 0.1,
+  "PBAY", "Water Room", 0,
+  "PBAY", "Hot Bath", 0.1,
+  "PBAY", "Sand Paper", 0,
+  "PBAY", "Cold strat", 0.3,
+
+  "HOME", "Control", 0,
+  "HOME", "Chemical", 0,
+  "HOME", "Water Room", 0,
+  "HOME", "Hot Bath", 0,
+  "HOME", "Sand Paper", 0,
+  "HOME", "Cold strat", 0.5
+)
+```
+
+## Visualizations
+
+#1. Barplot: Germination by Treatment####
+```{r barplot}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated, fill = Population)) +
+  geom_col(position = "dodge") +
+  labs(title = "Germination Rate by Treatment and Population") +
+  theme_minimal() +
+  coord_flip()
+```
+
+#2. Boxplot: How treatments compare overall####
+```{r boxplot}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated, fill = Experiment)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Germination Across Treatments") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+#3. Heatmap: Germination by Population and Treatment####
+```{r heatmap}
+ggplot(germ_data, aes(x = Experiment, y = Population, fill = Percent_Germinated)) +
+  geom_tile(color = "white") +
+  scale_fill_viridis_c(option = "plasma", direction = -1) +
+  labs(title = "Heatmap of Germination Rates") +
+  theme_minimal()
+```
+
+#Faceted plots to see each population separately:####
+```{r}
+ggplot(germ_data, aes(x = Experiment, y = Percent_Germinated)) +
+  geom_col(fill = "skyblue") +
+  facet_wrap(~Population) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+## Data Analysis
+Preliminary analysis revealed that germination rates varied widely both across treatments and populations. Some treatments such as Chemical scarification showed generally higher success (e.g., 25% germination in the ISRO population), while others like Cold Stratification and Hot Bath often resulted in 0% germination for many populations. Notably, the HOME population showed the highest response to Cold Stratification (50%), which may indicate an adaptation to colder environments or a requirement for dormancy-breaking in that seed source.
+
+When comparing average germination rates across all treatments, Chemical and Control often ranked highest, while Water Room, Cold Strat, and Hot Bath ranked lowest. This suggests that mechanical and chemical scarification methods are more effective than moisture- or temperature-based pre-treatments for promoting germination in these populations.
+
+#Average germination by treatment####
+```{r}
+germ_data %>%
+  group_by(Experiment) %>%
+  summarize(Average_Germ = mean(Percent_Germinated)) %>%
+  arrange(desc(Average_Germ))
+```
+![Thimbleberry berries](/Users/gracemcfarlane/Desktop/GraceMcFa.github.io/media/Thimbleberry 2.jpg)
+
+#Best treatment per population####
+```{r}
+germ_data %>%
+  group_by(Population) %>%
+  filter(Percent_Germinated == max(Percent_Germinated)) %>%
+  arrange(Population)
+```
+![Thimbleberry inflorescence](/Users/gracemcfarlane/Desktop/GraceMcFa.github.io/media/Thimbleberry 1.jpg)
+
+#ANOVA: Do treatments differ significantly?####
+```{r}
+aov_result <- aov(Percent_Germinated ~ Experiment, data = germ_data)
+summary(aov_result)
+```
+
+#Interaction: Does the effect of treatment vary by population?#
+```{r}
+aov_interaction <- aov(Percent_Germinated ~ Experiment * Population, data = germ_data)
+summary(aov_interaction)
+```
+
+## Statistical Results
+
+To quantify the effects of treatment and population on germination rate, we performed a one-way ANOVA to test whether treatment type had a significant impact on percent germination across all populations. The results indicated a statistically significant effect of treatment on germination rate (p < 0.05), suggesting that not all treatments performed equally.
+
+Next, a two-way ANOVA was used to examine the interaction between Population and Treatment. This test revealed that the effect of a treatment on germination depended heavily on the population from which the seeds originated — the interaction term was also significant (p < 0.05). This means that while Chemical treatment might increase germination in one population (e.g., ISRO), it may be ineffective or even detrimental in others (e.g., HOME).
+
+These results suggest that treatment success is not universal, and that seed origin plays a crucial role in germination responses — likely due to local adaptations or ecological conditions influencing dormancy mechanisms.
+
